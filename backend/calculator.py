@@ -10,7 +10,6 @@ DEBT_MF_OLD_LTCG_RATE = 0.125
 PROPERTY_LTCG_RATE = 0.125
 PROPERTY_LTCG_INDEXED_RATE = 0.20
 
-# Cutoffs
 DEBT_MF_CUTOFF = datetime(2023, 4, 1)
 PROPERTY_CUTOFF = datetime(2024, 7, 23)
 
@@ -25,14 +24,13 @@ def calculate_tax(trades, user_slab=0.0):
     }
     trade_results = []
     total_equity_ltcg = 0.0
-    total_property_ltcg = 0.0
 
     for t in trades:
         holding_days = (t['sell_date'] - t['buy_date']).days
         gain = (t['sell_price'] - t['buy_price']) * t['quantity']
         asset = t['asset_type']
         
-        # Determine Gain Type
+        # ✅ STRICT HOLDING PERIOD LOGIC
         if asset == 'equity':
             gain_type = "LTCG" if holding_days >= 365 else "STCG"
         elif asset == 'crypto':
@@ -41,7 +39,6 @@ def calculate_tax(trades, user_slab=0.0):
             is_old = t['buy_date'] < DEBT_MF_CUTOFF
             gain_type = "LTCG" if (is_old and holding_days >= 1095) else "Slab"
         elif asset == 'property':
-            is_old = t['buy_date'] < PROPERTY_CUTOFF
             gain_type = "LTCG" if holding_days >= 730 else "STCG"
         else:
             gain_type = "Other"
@@ -71,14 +68,12 @@ def calculate_tax(trades, user_slab=0.0):
             if gain_type == 'STCG':
                 tax = gain * user_slab
             else:
-                # Old property: min(12.5% actual, 20% indexed)
                 tax_125 = gain * PROPERTY_LTCG_RATE
                 tax_indexed = 0.0
                 if 'indexed_cost' in t and t['indexed_cost'] and t['indexed_cost'] > 0:
                     indexed_gain = (t['sell_price'] - t['indexed_cost']) * t['quantity']
                     tax_indexed = max(0, indexed_gain) * PROPERTY_LTCG_INDEXED_RATE
                 tax = min(tax_125, tax_indexed) if tax_indexed > 0 else tax_125
-                total_property_ltcg += gain
             summary['property_gain'] += gain
             summary['property_tax'] += tax
 
@@ -92,7 +87,7 @@ def calculate_tax(trades, user_slab=0.0):
             "gain_type": gain_type, "tax": round(tax, 2)
         })
 
-    # Equity LTCG Exemption Logic
+    # ✅ EQUITY LTCG EXEMPTION (Strictly separated from STCG)
     if total_equity_ltcg > 0:
         taxable = max(0, total_equity_ltcg - LTCG_EXEMPTION)
         summary['total_ltcg_gain'] = total_equity_ltcg
@@ -102,7 +97,7 @@ def calculate_tax(trades, user_slab=0.0):
     else:
         summary['total_ltcg_gain'] = 0.0
 
-    # Final Tax + 4% Cess
+    # ✅ FINAL TAX + 4% CESS
     summary['total_tax_before_cess'] = (
         summary['stcg_tax'] + summary['ltcg_tax'] +
         summary['crypto_tax'] + summary['debt_mf_tax'] + summary['property_tax']
@@ -110,7 +105,7 @@ def calculate_tax(trades, user_slab=0.0):
     summary['cess'] = summary['total_tax_before_cess'] * CESS_RATE
     summary['total_tax'] = summary['total_tax_before_cess'] + summary['cess']
 
-    # Distribute Equity LTCG tax proportionally
+    # ✅ DISTRIBUTE LTCG TAX PROPORTIONALLY
     if total_equity_ltcg > 0 and summary['ltcg_tax'] > 0:
         ratio = summary['ltcg_tax'] / total_equity_ltcg
         for tr in trade_results:
