@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Result</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- CDN Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Tax Calculation Result</h1>
+            <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
+
+    <main class="container" id="printArea">
+        <div class="summary-grid">
+            <div class="card"><h3>Total STCG Gain</h3><div class="val" id="stcgGain">₹0.00</div></div>
+            <div class="card"><h3>Total LTCG Gain</h3><div class="val" id="ltcgGain">₹0.00</div></div>
+            <div class="card crypto-card"><h3>Total Crypto Gain</h3><div class="val" id="cryptoGain">₹0.00</div></div>
+            <div class="card"><h3>LTCG Exemption Used</h3><div class="val" id="ltcgExempt">₹0 / ₹1.25L</div></div>
+            <div class="card highlight"><h3>Total Tax Payable (incl. 4% Cess)</h3><div class="val" id="totalTax">₹0.00</div></div>
+        </div>
+
+        <section class="charts-section">
+            <div class="chart-box"><canvas id="gainPieChart"></canvas></div>
+            <div class="chart-box"><canvas id="gainTaxBarChart"></canvas></div>
+        </section>
+
+        <section id="taxSuggestions" class="suggestions-section"></section>
+
+        <h3 class="section-title">Trade-wise Breakdown</h3>
+        <table>
+            <thead><tr><th>Asset</th><th>Type</th><th>Buy Date</th><th>Sell Date</th><th>Qty</th><th>Gain</th><th>Tax</th></tr></thead>
+            <tbody id="tradeTableBody"></tbody>
+        </table>
+
+        <section id="quickStats" class="stats-section"></section>
+
+        <div class="action-buttons">
+            <button id="downloadPdfBtn" class="primary-btn">Download PDF</button>
+            <button id="printBtn" class="secondary-btn">Print Report</button>
+            <button id="shareBtn" class="secondary-btn">Share Summary</button>
+            <button id="saveReportBtn" class="secondary-btn">Save Report</button>
+            <button id="viewHistoryBtn" class="secondary-btn">View History</button>
+            <a href="/" class="back-btn">Back to Calculator</a>
+        </div>
+    </main>
+
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Saved Reports</h3>
+            <div id="historyList"></div>
+            <button id="closeModal" class="secondary-btn">Close</button>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
