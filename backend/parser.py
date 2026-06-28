@@ -21,18 +21,18 @@ def parse_and_validate_trades(trades_data):
                 continue
 
             asset_type = t['asset_type'].lower()
-            if asset_type not in ['equity', 'crypto', 'debt_mf']:
+            if asset_type not in ['equity', 'crypto', 'debt_mf', 'property']:
                 errors.append(f"Trade {i+1}: Invalid asset type.")
                 continue
 
+            indexed_cost = float(t.get('indexed_cost', 0)) if t.get('indexed_cost') else 0.0
+
             validated.append({
                 "stock_name": str(t['stock_name']),
-                "buy_date": buy_date,
-                "buy_price": buy_price,
-                "sell_date": sell_date,
-                "sell_price": sell_price,
-                "quantity": quantity,
-                "asset_type": asset_type
+                "buy_date": buy_date, "buy_price": buy_price,
+                "sell_date": sell_date, "sell_price": sell_price,
+                "quantity": quantity, "asset_type": asset_type,
+                "indexed_cost": indexed_cost
             })
         except Exception as e:
             errors.append(f"Trade {i+1}: {str(e)}")
