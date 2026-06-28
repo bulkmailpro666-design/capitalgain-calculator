@@ -1,3 +1,7 @@
+function formatCurrency(amount) {
+    return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', minimumFractionDigits: 2 }).format(amount || 0);
+}
+
 // Dark Mode
 function initDarkMode() {
     const toggle = document.getElementById('darkModeToggle');
@@ -24,7 +28,7 @@ function renderCharts(data) {
         type: 'doughnut',
         data: {
             labels: ['STCG', 'LTCG', 'Crypto'],
-            datasets: [{ data: [stcg, ltcg, crypto], backgroundColor: ['#3b82f6', '#10b981', '#ea580c'], borderWidth: 0 }]
+            datasets: [{ data: [stcg, ltcg, crypto], backgroundColor: ['#3b82f6', '#10b981', '#f97316'], borderWidth: 0 }]
         },
         options: { responsive: true, plugins: { legend: { position: 'bottom' }, title: { display: true, text: 'Gain Breakdown' } } }
     });
@@ -47,13 +51,13 @@ function renderSuggestions(data) {
     let html = '';
 
     if(ltcg < 125000) {
-        html += `<div class="suggestion-box green">✅ LTCG ₹${ltcg.toLocaleString('en-IN')} hai. ₹1,25,000 tak tax-free hai. Aap aur ₹${(125000-ltcg).toLocaleString('en-IN')} profit book kar sakte ho - ZERO TAX.</div>`;
+        html += `<div class="suggestion-box green">✅ LTCG ₹${formatCurrency(ltcg)} hai. ₹1,25,000 tak tax-free hai. Aap aur ${formatCurrency(125000-ltcg)} profit book kar sakte ho - ZERO TAX.</div>`;
     } else {
-        html += `<div class="suggestion-box yellow">⚠️ LTCG limit se ₹${(ltcg-125000).toLocaleString('en-IN')} zyada hai. Tax bachane ke liye loss-making stocks identify karo.</div>`;
+        html += `<div class="suggestion-box yellow">⚠️ LTCG limit se ${formatCurrency(ltcg-125000)} zyada hai. Tax bachane ke liye loss-making stocks identify karo.</div>`;
     }
 
     if(hasCrypto) {
-        html += `<div class="suggestion-box orange">🔸 Crypto pe 30% flat tax lagta hai. Loss set-off allowed nahi hai.</div>`;
+        html += `<div class="suggestion-box orange">🔸 Crypto pe 30% flat tax + 4% cess = 31.2% lagta hai. Loss set-off allowed nahi hai.</div>`;
     }
 
     if(ltcg === 0 && !hasCrypto) {
@@ -89,7 +93,7 @@ function generatePDF(data) {
     const s = data.summary;
 
     doc.setFontSize(20); doc.text('Capital Gains Tax Report', 105, 20, {align:'center'});
-    doc.setFontSize(10); doc.text(`Date: ${new Date().toLocaleDateString('en-IN')} | FY: 2024-25`, 105, 28, {align:'center'});
+    doc.setFontSize(10); doc.text(`Date: ${new Date().toLocaleDateString('en-IN')} | FY: 2025-26`, 105, 28, {align:'center'});
     
     doc.autoTable({ startY: 35, head: [['Metric', 'Amount (INR)']], body: [
         ['Total STCG Gain', s.total_stcg_gain.toFixed(2)],
@@ -111,7 +115,7 @@ function generatePDF(data) {
 function initShare() {
     document.getElementById('shareBtn')?.addEventListener('click', async () => {
         const res = JSON.parse(localStorage.getItem('cgc_current_result') || '{}');
-        const text = `Capital Gains Summary:\nSTCG: ₹${(res.summary?.total_stcg_gain||0).toLocaleString('en-IN')}\nLTCG: ₹${(res.summary?.total_ltcg_gain||0).toLocaleString('en-IN')}\nTotal Tax: ₹${(res.summary?.total_tax||0).toLocaleString('en-IN')}\nCalculated via Capital Gains Calculator`;
+        const text = `Capital Gains Summary:\nSTCG: ${formatCurrency(res.summary?.total_stcg_gain)}\nLTCG: ${formatCurrency(res.summary?.total_ltcg_gain)}\nCrypto: ${formatCurrency(res.summary?.crypto_gain)}\nTotal Tax: ${formatCurrency(res.summary?.total_tax)}\nCalculated via Capital Gains Calculator`;
         if(navigator.share) navigator.share({ text });
         else { navigator.clipboard.writeText(text); alert('Summary copied!'); }
     });
@@ -147,7 +151,7 @@ function initShare() {
     };
 }
 
-// ✅ INIT & UI MAPPING (FIXED STCG/LTCG SEPARATION)
+// ✅ INIT & STRICT UI MAPPING
 window.addEventListener('DOMContentLoaded', () => {
     initDarkMode();
     initShare();
@@ -156,16 +160,14 @@ window.addEventListener('DOMContentLoaded', () => {
         const data = e.detail;
         const s = data.summary;
 
-        // Strict ID mapping
-        const setVal = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = `₹${val.toLocaleString('en-IN', {maximumFractionDigits:2})}`; };
-        
-        setVal('stcgGain', s.total_stcg_gain);
-        setVal('ltcgGain', s.total_ltcg_gain);
-        setVal('cryptoGain', s.crypto_gain);
-        setVal('ltcgExempt', `${s.ltcg_exemption_used.toLocaleString('en-IN')} / 1,25,000`);
-        setVal('totalTax', s.total_tax);
+        // STRICT CARD MAPPING (NO MIXING)
+        document.getElementById('stcgGain').textContent = formatCurrency(s.total_stcg_gain);
+        document.getElementById('ltcgGain').textContent = formatCurrency(s.total_ltcg_gain);
+        document.getElementById('cryptoGain').textContent = formatCurrency(s.crypto_gain);
+        document.getElementById('ltcgExempt').textContent = `${formatCurrency(s.ltcg_exemption_used)} / ₹1,25,000`;
+        document.getElementById('totalTax').textContent = formatCurrency(s.total_tax);
 
-        // Table
+        // TABLE
         const tbody = document.getElementById('tradeTableBody');
         if(tbody) {
             tbody.innerHTML = data.trades.map(t=>`
@@ -175,8 +177,8 @@ window.addEventListener('DOMContentLoaded', () => {
                     <td>${t.buy_date}</td>
                     <td>${t.sell_date}</td>
                     <td>${t.quantity}</td>
-                    <td>₹${t.gain.toLocaleString('en-IN',{maximumFractionDigits:2})}</td>
-                    <td>₹${t.tax.toLocaleString('en-IN',{maximumFractionDigits:2})}</td>
+                    <td>${formatCurrency(t.gain)}</td>
+                    <td>${formatCurrency(t.tax)}</td>
                 </tr>
             `).join('');
         }
