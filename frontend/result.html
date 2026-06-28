@@ -5,11 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tax Result</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- CDN Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .card { padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid var(--border, #e2e8f0); background: var(--surface, #fff); box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1)); }
+        .card h3 { font-size: 0.75rem; font-weight: 600; color: var(--text-muted, #64748b); text-transform: uppercase; margin-bottom: 0.4rem; }
+        .card .val { font-size: 1.3rem; font-weight: 700; }
+        .subtext { display: block; font-size: 0.75rem; color: var(--text-muted, #64748b); margin-top: 0.25rem; }
+        
+        .stcg-card { border-left: 4px solid #3b82f6; }
+        .stcg-card .val { color: #2563eb; }
+        .ltcg-card { border-left: 4px solid #10b981; }
+        .ltcg-card .val { color: #059669; }
+        .crypto-card { border-left: 4px solid #f97316; }
+        .crypto-card .val { color: #ea580c; }
+        .exempt-card { border-left: 4px solid #0d9488; }
+        .exempt-card .val { color: #0f766e; }
+        .tax-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: none; }
+        .tax-card h3, .tax-card .val { color: white; }
+        
+        @media(max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
     <header>
@@ -21,11 +40,11 @@
 
     <main class="container" id="printArea">
         <div class="summary-grid">
-            <div class="card"><h3>Total STCG Gain</h3><div class="val" id="stcgGain">₹0.00</div></div>
-            <div class="card"><h3>Total LTCG Gain</h3><div class="val" id="ltcgGain">₹0.00</div></div>
-            <div class="card crypto-card"><h3>Total Crypto Gain</h3><div class="val" id="cryptoGain">₹0.00</div></div>
-            <div class="card"><h3>LTCG Exemption Used</h3><div class="val" id="ltcgExempt">₹0 / ₹1.25L</div></div>
-            <div class="card highlight"><h3>Total Tax Payable (incl. 4% Cess)</h3><div class="val" id="totalTax">₹0.00</div></div>
+            <div class="card stcg-card"><h3>Total STCG Gain</h3><div class="val" id="stcgGain">₹0.00</div></div>
+            <div class="card ltcg-card"><h3>Total LTCG Gain</h3><div class="val" id="ltcgGain">₹0.00</div></div>
+            <div class="card crypto-card"><h3>Total Crypto Gain</h3><div class="val" id="cryptoGain">₹0.00</div><span class="subtext">Taxed at 31.2%</span></div>
+            <div class="card exempt-card"><h3>LTCG Exemption Used</h3><div class="val" id="ltcgExempt">₹0 / ₹1,25,000</div></div>
+            <div class="card tax-card"><h3>Total Tax Payable (incl. 4% Cess)</h3><div class="val" id="totalTax">₹0.00</div></div>
         </div>
 
         <section class="charts-section">
