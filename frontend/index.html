@@ -1,37 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capital Gains Calculator</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <header>
-        <div class="header-content">
-            <h1>Capital Gains Tax Calculator</h1>
-            <p>FY 2024-25 | Equity • Crypto • Debt MF</p>
-            <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
-        </div>
-    </header>
-
-    <main class="container">
-        <div class="top-actions">
-            <button id="loadLastBtn" class="secondary-btn">Load Last Calculation</button>
-        </div>
-
-        <form id="tradeForm">
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-                <label>Your Income Tax Slab (for Debt MF)</label>
-                <select id="userSlab" required>
-                    <option value="0">0% (No Income)</option>
-                    <option value="0.05">5%</option>
-                    <option value="0.10">10%</option>
-                    <option value="0.20">20%</option>
-                    <option value="0.30" selected>30%</option>
-                </select>
-            </div>
-
             <div id="tradesContainer"></div>
 
             <div class="actions">
@@ -41,7 +7,6 @@
             <div id="formError" class="error-msg"></div>
         </form>
     </main>
-
     <script src="js/form.js"></script>
     <script src="js/main.js"></script>
 </body>
