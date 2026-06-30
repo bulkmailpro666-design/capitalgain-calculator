@@ -3,29 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Result | TaxCompare</title>
+    <title>Tax Result</title>
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/result.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-    <header><h1>Tax Calculation Result</h1></header>
-    <main class="container" id="printArea">
-        <div id="winnerBanner" class="banner"></div>
-        <div class="comparison-grid">
-            <div class="regime-card new"><h2>New Regime</h2><div class="details" id="newDetails"></div></div>
-            <div class="regime-card old"><h2>Old Regime</h2><div class="details" id="oldDetails"></div></div>
+    <header>
+        <div class="header-content">
+            <h1>Tax Calculation Result</h1>
+            <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
-        <div class="chart-container"><canvas id="taxChart"></canvas></div>
-        <div id="suggestions" class="suggestions"></div>
-        <div class="actions">
-            <button id="pdfBtn" class="primary-btn">Download PDF</button>
+    </header>
+    <main class="container" id="printArea">
+        <div class="summary-grid">
+            <div class="card stcg-card"><h3>Total STCG Gain</h3><div class="val" id="stcgGain">₹0.00</div></div>
+            <div class="card ltcg-card"><h3>Total LTCG Gain</h3><div class="val" id="ltcgGain">₹0.00</div></div>
+            <div class="card crypto-card"><h3>Total Crypto Gain</h3><div class="val" id="cryptoGain">₹0.00</div><span class="subtext">Taxed at 31.2%</span></div>
+            <div class="card exempt-card"><h3>LTCG Exemption Used</h3><div class="val" id="ltcgExempt">₹0 / ₹1,25,000</div></div>
+            <div class="card tax-card"><h3>Total Tax Payable (incl. 4% Cess)</h3><div class="val" id="totalTax">₹0.00</div></div>
+        </div>
+        <section class="charts-section">
+            <div class="chart-box"><canvas id="gainPieChart"></canvas></div>
+            <div class="chart-box"><canvas id="gainTaxBarChart"></canvas></div>
+        </section>
+        <section id="taxSuggestions" class="suggestions-section"></section>
+        <h3 class="section-title">Trade-wise Breakdown</h3>
+        <table>
+            <thead><tr><th>Asset</th><th>Type</th><th>Buy Date</th><th>Sell Date</th><th>Qty</th><th>Gain</th><th>Tax</th></tr></thead>
+            <tbody id="tradeTableBody"></tbody>
+        </table>
+        <section id="quickStats" class="stats-section"></section>
+        <div class="action-buttons">
+            <button id="downloadPdfBtn" class="primary-btn">Download PDF</button>
+            <button id="printBtn" class="secondary-btn">Print Report</button>
             <button id="shareBtn" class="secondary-btn">Share Summary</button>
-            <a href="/" class="back-btn">Calculate Again</a>
+            <button id="saveReportBtn" class="secondary-btn">Save Report</button>
+            <button id="viewHistoryBtn" class="secondary-btn">View History</button>
+            <a href="/" class="back-btn">Back to Calculator</a>
         </div>
     </main>
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content"><h3>Saved Reports</h3><div id="historyList"></div><button id="closeModal" class="secondary-btn">Close</button></div>
+    </div>
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
 </body>
