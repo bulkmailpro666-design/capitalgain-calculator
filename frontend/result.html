@@ -3,83 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tax Result</title>
+    <title>Result | TaxCompare</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/result.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-        .card { padding: 1.25rem; border-radius: 12px; text-align: center; border: 1px solid var(--border, #e2e8f0); background: var(--surface, #fff); box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1)); }
-        .card h3 { font-size: 0.75rem; font-weight: 600; color: var(--text-muted, #64748b); text-transform: uppercase; margin-bottom: 0.4rem; }
-        .card .val { font-size: 1.3rem; font-weight: 700; }
-        .subtext { display: block; font-size: 0.75rem; color: var(--text-muted, #64748b); margin-top: 0.25rem; }
-        
-        .stcg-card { border-left: 4px solid #3b82f6; }
-        .stcg-card .val { color: #2563eb; }
-        .ltcg-card { border-left: 4px solid #10b981; }
-        .ltcg-card .val { color: #059669; }
-        .crypto-card { border-left: 4px solid #f97316; }
-        .crypto-card .val { color: #ea580c; }
-        .exempt-card { border-left: 4px solid #0d9488; }
-        .exempt-card .val { color: #0f766e; }
-        .tax-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border: none; }
-        .tax-card h3, .tax-card .val { color: white; }
-        
-        @media(max-width: 640px) { .summary-grid { grid-template-columns: 1fr; } }
-    </style>
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <h1>Tax Calculation Result</h1>
-            <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
-        </div>
-    </header>
-
+    <header><h1>Tax Calculation Result</h1></header>
     <main class="container" id="printArea">
-        <div class="summary-grid">
-            <div class="card stcg-card"><h3>Total STCG Gain</h3><div class="val" id="stcgGain">₹0.00</div></div>
-            <div class="card ltcg-card"><h3>Total LTCG Gain</h3><div class="val" id="ltcgGain">₹0.00</div></div>
-            <div class="card crypto-card"><h3>Total Crypto Gain</h3><div class="val" id="cryptoGain">₹0.00</div><span class="subtext">Taxed at 31.2%</span></div>
-            <div class="card exempt-card"><h3>LTCG Exemption Used</h3><div class="val" id="ltcgExempt">₹0 / ₹1,25,000</div></div>
-            <div class="card tax-card"><h3>Total Tax Payable (incl. 4% Cess)</h3><div class="val" id="totalTax">₹0.00</div></div>
+        <div id="winnerBanner" class="banner"></div>
+        <div class="comparison-grid">
+            <div class="regime-card new"><h2>New Regime</h2><div class="details" id="newDetails"></div></div>
+            <div class="regime-card old"><h2>Old Regime</h2><div class="details" id="oldDetails"></div></div>
         </div>
-
-        <section class="charts-section">
-            <div class="chart-box"><canvas id="gainPieChart"></canvas></div>
-            <div class="chart-box"><canvas id="gainTaxBarChart"></canvas></div>
-        </section>
-
-        <section id="taxSuggestions" class="suggestions-section"></section>
-
-        <h3 class="section-title">Trade-wise Breakdown</h3>
-        <table>
-            <thead><tr><th>Asset</th><th>Type</th><th>Buy Date</th><th>Sell Date</th><th>Qty</th><th>Gain</th><th>Tax</th></tr></thead>
-            <tbody id="tradeTableBody"></tbody>
-        </table>
-
-        <section id="quickStats" class="stats-section"></section>
-
-        <div class="action-buttons">
-            <button id="downloadPdfBtn" class="primary-btn">Download PDF</button>
-            <button id="printBtn" class="secondary-btn">Print Report</button>
+        <div class="chart-container"><canvas id="taxChart"></canvas></div>
+        <div id="suggestions" class="suggestions"></div>
+        <div class="actions">
+            <button id="pdfBtn" class="primary-btn">Download PDF</button>
             <button id="shareBtn" class="secondary-btn">Share Summary</button>
-            <button id="saveReportBtn" class="secondary-btn">Save Report</button>
-            <button id="viewHistoryBtn" class="secondary-btn">View History</button>
-            <a href="/" class="back-btn">Back to Calculator</a>
+            <a href="/" class="back-btn">Calculate Again</a>
         </div>
     </main>
-
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <h3>Saved Reports</h3>
-            <div id="historyList"></div>
-            <button id="closeModal" class="secondary-btn">Close</button>
-        </div>
-    </div>
-
     <script src="js/api.js"></script>
     <script src="js/main.js"></script>
 </body>
