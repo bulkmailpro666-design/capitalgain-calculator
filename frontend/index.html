@@ -3,49 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaxCompare by Foodwell</title>
+    <title>Capital Gains Calculator</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <header><h1>TaxCompare by Foodwell</h1><p>FY 2025-26 | Old vs New Regime</p></header>
+    <header>
+        <div class="header-content">
+            <h1>Capital Gains Tax Calculator</h1>
+            <p>FY 2025-26 | Equity • Crypto • Debt MF</p>
+            <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
+        </div>
+    </header>
     <main class="container">
-        <form id="taxForm">
-            <div class="section"><h2>Basic Details</h2>
-                <div class="grid">
-                    <div class="form-group"><label>Age</label>
-                        <select id="age"><option value="30">Below 60</option><option value="65">60-80</option><option value="85">Above 80</option></select>
-                    </div>
-                    <div class="form-group"><label>City Type</label>
-                        <select id="city"><option value="metro">Metro</option><option value="non-metro">Non-Metro</option></select>
-                    </div>
-                </div>
+        <div class="top-actions"><button id="loadLastBtn" class="secondary-btn">Load Last Calculation</button></div>
+        <form id="tradeForm">
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Your Income Tax Slab (for Debt MF)</label>
+                <select id="userSlab" required>
+                    <option value="0">0%</option><option value="0.05">5%</option><option value="0.10">10%</option><option value="0.20">20%</option><option value="0.30" selected>30%</option>
+                </select>
             </div>
-            <div class="section"><h2>Income Details (Yearly)</h2>
-                <div class="grid">
-                    <div class="form-group"><label>Basic Salary</label><input type="number" id="basic" required></div>
-                    <div class="form-group"><label>HRA Received</label><input type="number" id="hra_received" value="0"></div>
-                    <div class="form-group"><label>Special Allowance</label><input type="number" id="special" value="0"></div>
-                    <div class="form-group"><label>Other Allowances</label><input type="number" id="other_allow" value="0"></div>
-                    <div class="form-group"><label>Rental Income</label><input type="number" id="rental" value="0"></div>
-                    <div class="form-group"><label>FD/Savings Interest</label><input type="number" id="fd_interest" value="0"></div>
-                </div>
+            <div id="tradesContainer"></div>
+            <div class="actions">
+                <button type="button" id="addTradeBtn" class="secondary-btn">+ Add Trade</button>
+                <button type="submit" id="calcBtn">Calculate Tax</button>
             </div>
-            <div class="section"><h2>Old Regime Deductions</h2>
-                <div class="grid">
-                    <div class="form-group"><label>80C Investments (max ₹1.5L)</label><input type="number" id="sec_80c" max="150000" value="0"></div>
-                    <div class="form-group"><label>80D Health Insurance (max ₹25K/₹50K)</label><input type="number" id="sec_80d" max="50000" value="0"></div>
-                    <div class="form-group"><label>Home Loan Interest (max ₹2L)</label><input type="number" id="home_loan" max="200000" value="0"></div>
-                    <div class="form-group"><label>Rent Paid (Monthly)</label><input type="number" id="rent_paid" value="0"></div>
-                    <div class="form-group"><label>NPS 80CCD(1B) (max ₹50K)</label><input type="number" id="sec_80ccd1b" max="50000" value="0"></div>
-                    <div class="form-group"><label>80E Education Loan</label><input type="number" id="sec_80e" value="0"></div>
-                    <div class="form-group"><label>80TTA Savings Interest (max ₹10K)</label><input type="number" id="sec_80tta" max="10000" value="0"></div>
-                    <div class="form-group"><label>80G Donations</label><input type="number" id="sec_80g" value="0"></div>
-                </div>
-            </div>
-            <button type="submit" id="calcBtn">Compare Both Regimes</button>
             <div id="formError" class="error-msg"></div>
         </form>
     </main>
     <script src="js/form.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
