@@ -1,0 +1,16 @@
+.banner { padding: 1.5rem; text-align: center; background: #ecfdf5; border-left: 5px solid #10b981; border-radius: 10px; margin-bottom: 1.5rem; font-size: 1.2rem; font-weight: 600; color: #065f46; }
+.comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.regime-card { background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border); }
+.regime-card.new { border-top: 4px solid #10b981; }
+.regime-card.old { border-top: 4px solid #3b82f6; }
+.regime-card h2 { margin-bottom: 1rem; font-size: 1.2rem; }
+.detail-row { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+.detail-row.total { font-weight: 700; color: var(--primary); border-bottom: none; font-size: 1.1rem; margin-top: 0.5rem; }
+.chart-container { background: white; padding: 1.5rem; border-radius: 12px; margin: 2rem 0; }
+.suggestions { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; }
+.actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem; }
+.primary-btn { background: var(--primary); color: white; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; }
+.secondary-btn { background: #e2e8f0; color: var(--text); padding: 0.8rem 1.5rem; border: none; border-radius: 8px; cursor: pointer; }
+.back-btn { background: #334155; color: white; padding: 0.8rem 1.5rem; border-radius: 8px; text-decoration: none; }
+@media print { header, .actions, .chart-container { display: none; } body { background: white; } }
+@media(max-width: 768px) { .comparison-grid { grid-template-columns: 1fr; } }
