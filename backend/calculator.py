@@ -1,106 +1,85 @@
-from datetime import datetime
+def calculate_tax(data):
+    # --- INPUTS ---
+    age = int(data.get('age', 30))
+    basic = float(data.get('basic', 0))
+    hra_received = float(data.get('hra_received', 0))
+    special = float(data.get('special', 0))
+    other_allow = float(data.get('other_allow', 0))
+    rental = float(data.get('rental', 0))
+    fd_interest = float(data.get('fd_interest', 0))
+    other_income = float(data.get('other_income', 0))
+    
+    city = data.get('city', 'non-metro')
+    rent_paid_annual = float(data.get('rent_paid', 0)) * 12  # Monthly to Annual
+    
+    sec_80c = min(float(data.get('sec_80c', 0)), 150000)
+    sec_80d_cap = 50000 if age >= 60 else 25000
+    sec_80d = min(float(data.get('sec_80d', 0)), sec_80d_cap)
+    home_loan = min(float(data.get('home_loan', 0)), 200000)
+    sec_80ccd1b = min(float(data.get('sec_80ccd1b', 0)), 50000)
+    sec_80e = float(data.get('sec_80e', 0))
+    sec_80tta = min(float(data.get('sec_80tta', 0)), 10000)
+    sec_80g = float(data.get('sec_80g', 0))
 
-# FY 2025-26 Constants
-CESS_RATE = 0.04
-LTCG_EXEMPTION = 125000
-EQUITY_STCG_RATE = 0.20
-EQUITY_LTCG_RATE = 0.125
-CRYPTO_RATE = 0.30
-DEBT_MF_OLD_LTCG_RATE = 0.125
+    gross_income = basic + hra_received + special + other_allow + rental + fd_interest + other_income
 
-DEBT_MF_CUTOFF = datetime(2023, 4, 1)
+    # --- HRA EXEMPTION (Old Regime Only) ---
+    hra_exempt = 0.0
+    if hra_received > 0 and rent_paid_annual > 0 and basic > 0:
+        hra_pct = 0.5 if city == 'metro' else 0.4
+        hra_exempt = min(
+            hra_received,
+            hra_pct * basic,
+            max(0, rent_paid_annual - (0.1 * basic))
+        )
 
-def calculate_tax(trades, user_slab=0.0):
-    summary = {
-        "total_stcg_gain": 0.0,
-        "total_ltcg_gain": 0.0,
-        "crypto_gain": 0.0,
-        "stcg_tax": 0.0,
-        "ltcg_tax": 0.0,
-        "crypto_tax": 0.0,
-        "debt_mf_tax": 0.0,
-        "total_tax_before_cess": 0.0,
-        "cess": 0.0,
-        "total_tax": 0.0,
-        "ltcg_exemption_used": 0.0,
-        "ltcg_exemption_remaining": 0.0
+    # --- NEW REGIME ---
+    new_std_ded = 75000
+    new_taxable = max(0, gross_income - new_std_ded)
+    new_tax = _calc_slab_tax(new_taxable, [
+        (400000, 0.0), (800000, 0.05), (1200000, 0.10),
+        (1600000, 0.15), (2000000, 0.20), (2400000, 0.25), (float('inf'), 0.30)
+    ])
+    new_rebate = min(new_tax, 60000) if new_taxable <= 1200000 else 0
+    new_after_rebate = max(0, new_tax - new_rebate)
+    new_cess = new_after_rebate * 0.04
+    new_final = new_after_rebate + new_cess
+
+    # --- OLD REGIME ---
+    old_std_ded = 50000
+    old_exempt_limit = 250000
+    if 60 <= age < 80: old_exempt_limit = 300000
+    elif age >= 80: old_exempt_limit = 500000
+
+    total_old_deductions = sec_80c + sec_80d + hra_exempt + home_loan + sec_80ccd1b + sec_80e + sec_80tta + sec_80g
+    old_taxable = max(0, gross_income - old_std_ded - total_old_deductions)
+
+    old_slabs = [(old_exempt_limit, 0.0), (500000, 0.05), (1000000, 0.20), (float('inf'), 0.30)]
+    old_tax = _calc_slab_tax(old_taxable, old_slabs)
+    old_rebate = min(old_tax, 12500) if old_taxable <= 500000 else 0
+    old_after_rebate = max(0, old_tax - old_rebate)
+    old_cess = old_after_rebate * 0.04
+    old_final = old_after_rebate + old_cess
+
+    # --- COMPARISON ---
+    winner = "New Regime" if new_final <= old_final else "Old Regime"
+    saving = abs(new_final - old_final)
+
+    return {
+        "gross_income": round(gross_income, 2),
+        "new": {"std_ded": new_std_ded, "taxable": new_taxable, "tax": new_tax, "rebate": new_rebate, "cess": new_cess, "final_tax": new_final},
+        "old": {"std_ded": old_std_ded, "deductions": total_old_deductions, "taxable": old_taxable, "tax": old_tax, "rebate": old_rebate, "cess": old_cess, "final_tax": old_final},
+        "winner": winner, "saving": round(saving, 2)
     }
-    trade_results = []
-    total_equity_ltcg = 0.0
 
-    for t in trades:
-        holding_days = (t['sell_date'] - t['buy_date']).days
-        gain = (t['sell_price'] - t['buy_price']) * t['quantity']
-        asset = t['asset_type']
-
-        # STRICT HOLDING PERIOD LOGIC
-        if asset == 'equity':
-            gain_type = "LTCG" if holding_days >= 365 else "STCG"
-        elif asset == 'crypto':
-            gain_type = "Crypto"
-        elif asset == 'debt_mf':
-            is_old = t['buy_date'] < DEBT_MF_CUTOFF
-            gain_type = "LTCG" if (is_old and holding_days >= 1095) else "Slab"
+def _calc_slab_tax(taxable, slabs):
+    tax = 0.0
+    prev = 0
+    for limit, rate in slabs:
+        if taxable > prev:
+            taxable_in_slab = min(taxable, limit) - prev
+            tax += taxable_in_slab * rate
+            prev = limit
         else:
-            gain_type = "Other"
-
-        tax = 0.0
-        if gain > 0:
-            if asset == 'equity':
-                if gain_type == 'STCG':
-                    tax = gain * EQUITY_STCG_RATE
-                    summary['total_stcg_gain'] += gain
-                    summary['stcg_tax'] += tax
-                else:
-                    total_equity_ltcg += gain
-            elif asset == 'crypto':
-                tax = gain * CRYPTO_RATE
-                summary['crypto_gain'] += gain
-                summary['crypto_tax'] += tax
-            elif asset == 'debt_mf':
-                if gain_type == 'LTCG':
-                    tax = gain * DEBT_MF_OLD_LTCG_RATE
-                else:
-                    tax = gain * user_slab
-                summary['debt_mf_tax'] += tax
-
-        trade_results.append({
-            "stock_name": t['stock_name'],
-            "buy_date": t['buy_date'].strftime("%d/%m/%Y"),
-            "sell_date": t['sell_date'].strftime("%d/%m/%Y"),
-            "quantity": t['quantity'],
-            "buy_price": t['buy_price'],
-            "sell_price": t['sell_price'],
-            "asset_type": asset,
-            "gain": round(gain, 2),
-            "holding_days": holding_days,
-            "gain_type": gain_type,
-            "tax": round(tax, 2)
-        })
-
-    # LTCG EXEMPTION: STRICTLY EQUITY ONLY
-    if total_equity_ltcg > 0:
-        taxable_ltcg = max(0, total_equity_ltcg - LTCG_EXEMPTION)
-        summary['total_ltcg_gain'] = total_equity_ltcg
-        summary['ltcg_exemption_used'] = min(total_equity_ltcg, LTCG_EXEMPTION)
-        summary['ltcg_exemption_remaining'] = max(0, LTCG_EXEMPTION - total_equity_ltcg)
-        summary['ltcg_tax'] = taxable_ltcg * EQUITY_LTCG_RATE
-    else:
-        summary['total_ltcg_gain'] = 0.0
-
-    # 4% CESS ON TOTAL TAX
-    summary['total_tax_before_cess'] = (
-        summary['stcg_tax'] + summary['ltcg_tax'] +
-        summary['crypto_tax'] + summary['debt_mf_tax']
-    )
-    summary['cess'] = summary['total_tax_before_cess'] * CESS_RATE
-    summary['total_tax'] = summary['total_tax_before_cess'] + summary['cess']
-
-    # DISTRIBUTE LTCG TAX PROPORTIONALLY TO TRADES
-    if total_equity_ltcg > 0 and summary['ltcg_tax'] > 0:
-        ratio = summary['ltcg_tax'] / total_equity_ltcg
-        for tr in trade_results:
-            if tr['asset_type'] == 'equity' and tr['gain_type'] == 'LTCG' and tr['gain'] > 0:
-                tr['tax'] = round(tr['gain'] * ratio, 2)
-
-    return summary, trade_results
+            break
+    return tax
