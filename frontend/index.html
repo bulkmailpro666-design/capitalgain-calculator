@@ -10,30 +10,20 @@
     <header>
         <div class="header-content">
             <h1>Capital Gains Tax Calculator</h1>
-            <p>FY 2024-25 | Equity • Crypto • Debt MF</p>
+            <p>FY 2025-26 | Equity • Crypto • Debt MF</p>
             <button id="darkModeToggle" class="icon-btn" title="Toggle Dark Mode">🌙</button>
         </div>
     </header>
-
     <main class="container">
-        <div class="top-actions">
-            <button id="loadLastBtn" class="secondary-btn">Load Last Calculation</button>
-        </div>
-
+        <div class="top-actions"><button id="loadLastBtn" class="secondary-btn">Load Last Calculation</button></div>
         <form id="tradeForm">
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label>Your Income Tax Slab (for Debt MF)</label>
                 <select id="userSlab" required>
-                    <option value="0">0% (No Income)</option>
-                    <option value="0.05">5%</option>
-                    <option value="0.10">10%</option>
-                    <option value="0.20">20%</option>
-                    <option value="0.30" selected>30%</option>
+                    <option value="0">0%</option><option value="0.05">5%</option><option value="0.10">10%</option><option value="0.20">20%</option><option value="0.30" selected>30%</option>
                 </select>
             </div>
-
             <div id="tradesContainer"></div>
-
             <div class="actions">
                 <button type="button" id="addTradeBtn" class="secondary-btn">+ Add Trade</button>
                 <button type="submit" id="calcBtn">Calculate Tax</button>
@@ -41,7 +31,6 @@
             <div id="formError" class="error-msg"></div>
         </form>
     </main>
-
     <script src="js/form.js"></script>
     <script src="js/main.js"></script>
 </body>
