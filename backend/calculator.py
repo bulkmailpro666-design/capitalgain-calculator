@@ -6,13 +6,11 @@ EQUITY_STCG_RATE = 0.20
 EQUITY_LTCG_RATE = 0.125
 CRYPTO_RATE = 0.30
 DEBT_MF_OLD_LTCG_RATE = 0.125
-
 DEBT_MF_CUTOFF = datetime(2023, 4, 1)
 
 def calculate_tax(trades, user_slab=0.0):
     summary = {
-        "total_stcg_gain": 0.0, "total_ltcg_gain": 0.0,
-        "crypto_gain": 0.0,
+        "total_stcg_gain": 0.0, "total_ltcg_gain": 0.0, "crypto_gain": 0.0,
         "stcg_tax": 0.0, "ltcg_tax": 0.0, "crypto_tax": 0.0, "debt_mf_tax": 0.0,
         "total_tax_before_cess": 0.0, "cess": 0.0, "total_tax": 0.0,
         "ltcg_exemption_used": 0.0, "ltcg_exemption_remaining": 0.0
